@@ -12,12 +12,12 @@ Base = declarative_base()
 class User(Base):
     __tablename__ = "user_accounts"
 
-    uid: Mapped[uuid.UUID] = mapped_column(
-        pgUUID(as_uuid=True),
+    uid: Mapped[str] = mapped_column(
+        String(36),
         primary_key=True,
         unique=True,
         nullable=False,
-        default=uuid.uuid4,
+        default=lambda: str(uuid.uuid4()),  # Store UUID as string
         info={"description": "Unique identifier for the user account"},
     )
 

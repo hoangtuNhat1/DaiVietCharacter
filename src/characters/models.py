@@ -1,5 +1,7 @@
 from sqlalchemy import Column, Integer, String, Text, Float, TIMESTAMP, func
-from src.core.database import Base
+from sqlalchemy.ext.declarative import declarative_base
+
+Base = declarative_base()
 
 
 class Character(Base):

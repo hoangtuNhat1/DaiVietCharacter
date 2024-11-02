@@ -1,21 +1,17 @@
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from dotenv import load_dotenv
 import os
+from src.auth.models import Base as auth_base
+from src.characters.models import Base as char_base
+from src.config import Config
 
-load_dotenv()
-
-MYSQL_HOST = os.getenv("MYSQL_HOST")
-MYSQL_ROOT_PASSWORD = os.getenv("MYSQL_ROOT_PASSWORD")
-MYSQL_DATABASE = os.getenv("MYSQL_DATABASE")
-DATABASE_URL = (
-    f"mysql+pymysql://root:{MYSQL_ROOT_PASSWORD}@{MYSQL_HOST}/{MYSQL_DATABASE}"
-)
-
-engine = create_engine(DATABASE_URL)
+engine = create_engine(Config.DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
+
+
+def init_db():
+    auth_base.metadata.create_all(bind=engine)
+    char_base.metadata.create_all(bind=engine)
 
 
 def get_db():
