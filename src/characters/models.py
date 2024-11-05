@@ -1,5 +1,9 @@
-from sqlalchemy import Column, Integer, String, Text, Float, TIMESTAMP, func
+import uuid
+from datetime import datetime
+from sqlalchemy import Column, Integer, String, Text, Float, TIMESTAMP, func, ForeignKey
+from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
+from ..auth.models import user_character_association
 
 Base = declarative_base()
 
@@ -24,4 +28,9 @@ class Character(Base):
         server_default=func.current_timestamp(),
         onupdate=func.current_timestamp(),
         nullable=False,
+    )
+    users = relationship(
+        "User",
+        secondary=user_character_association,
+        back_populates="characters",
     )

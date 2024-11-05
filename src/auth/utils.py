@@ -1,4 +1,6 @@
 from datetime import datetime, timedelta
+import uuid
+import logging
 from passlib.context import CryptContext
 import jwt
 from passlib.context import CryptContext
@@ -36,8 +38,9 @@ def create_access_token(
 
 def decode_token(token: str) -> dict:
     try:
-        token_data = jwt.decode(jwt=token, algorithms=[Config.JWT_ALGORITHM])
-
+        token_data = jwt.decode(
+            jwt=token, key=Config.JWT_SECRET, algorithms=[Config.JWT_ALGORITHM]
+        )
         return token_data
     except jwt.PyJWTError as jwte:
         logging.exception(jwte)
