@@ -2,10 +2,8 @@ import uuid
 from datetime import datetime
 from sqlalchemy import Column, Integer, String, Text, Float, TIMESTAMP, func, ForeignKey
 from sqlalchemy.orm import relationship
-from sqlalchemy.ext.declarative import declarative_base
 from ..auth.models import user_character_association
-
-Base = declarative_base()
+from ..common.base_model import Base
 
 
 class Character(Base):

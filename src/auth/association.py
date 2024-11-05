@@ -1,7 +1,7 @@
 from sqlalchemy import Column, String, Table, ForeignKey, Integer
 from sqlalchemy.ext.declarative import declarative_base
+from ..common.base_model import Base
 
-Base = declarative_base()
 user_character_association = Table(
     "user_character",
     Base.metadata,
