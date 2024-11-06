@@ -1,11 +1,5 @@
 import uuid
-from sqlalchemy import (
-    Column,
-    String,
-    Boolean,
-    TIMESTAMP,
-    func,
-)
+from sqlalchemy import Column, String, Boolean, TIMESTAMP, func, Float
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from .association import user_character_association
@@ -38,7 +32,10 @@ class User(Base):
         info={"description": "Role of the user, e.g., 'admin', 'user', or 'guest'"},
     )
 
-    # Define the many-to-many relationship
+    # New balance field
+    balance = Column(Float, default=0.0)  # Add a balance field for the user
+
+    # Relationship with characters (many-to-many)
     characters = relationship(
         "Character",
         secondary=user_character_association,

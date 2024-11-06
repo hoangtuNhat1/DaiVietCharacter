@@ -1,28 +1,23 @@
 from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
-from .schemas import UserCreateModel, UserModel, UserLoginModel
+from .schemas import UserCreateModel, UserModel, UserLoginModel, UserCharactersModel
 from .service import UserService
 from src.core.database import get_db
 from fastapi.exceptions import HTTPException
 from sqlalchemy.orm import Session
 from .utils import *
-from .dependencies import RefreshTokenBearer, AccessTokenBearer
+from .dependencies import (
+    RefreshTokenBearer,
+    AccessTokenBearer,
+    get_current_user,
+    RoleChecker,
+)
 from src.db.redis import add_jti_to_blocklist
 
 REFRESH_TOKEN_EXPIRY = 7
 auth_router = APIRouter()
 user_service = UserService()
-
-
-async def get_current_user(
-    token_details: dict = Depends(AccessTokenBearer()),
-    db: Session = Depends(get_db),
-):
-    user_email = token_details["user"]["email"]
-
-    user = user_service.get_user_by_email(user_email, db)
-
-    return user
+role_checker = RoleChecker(["admin", "user"])
 
 
 @auth_router.post(
@@ -106,6 +101,22 @@ async def revoke_token(token_details: dict = Depends(AccessTokenBearer())):
     )
 
 
-# @auth_router.get("/me", response_model=UserBooksModel)
-# async def get_current_user(user=Depends(get_current_user)):
-#     return user
+@auth_router.post(
+    "/buy-character/{character_id}",
+    status_code=status.HTTP_200_OK,
+)
+async def buy_character(
+    character_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),  # Get the current user from the token
+):
+    # Call the service to handle the purchase
+    response, error = user_service.buy_character(
+        user_uid=current_user.uid, character_id=character_id, db=db
+    )
+
+    if error:
+        # Raise HTTPException if there's an error in the service logic
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=error)
+
+    return response

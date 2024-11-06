@@ -2,6 +2,8 @@ from .models import User
 from .schemas import UserCreateModel
 from .utils import generate_password_hash
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
+from src.characters.models import Character
 
 
 class UserService:
@@ -27,3 +29,29 @@ class UserService:
         db.refresh(new_user)
 
         return new_user
+
+    def buy_character(self, user_uid: str, character_id: int, db: Session):
+        user = db.query(User).filter(User.uid == user_uid).first()
+        character = db.query(Character).filter(Character.id == character_id).first()
+
+        if not user:
+            return None, "User not found"
+
+        if not character:
+            return None, "Character not found"
+
+        if user.balance < character.new_price:
+            return None, "Insufficient balance"
+
+        user.balance -= character.new_price
+        user.characters.append(character)
+
+        try:
+            db.commit()
+            db.refresh(user)
+            return {
+                "msg": f"Character '{character.name}' purchased successfully."
+            }, None
+        except IntegrityError:
+            db.rollback()
+            return None, "Error while processing the purchase."

@@ -1,7 +1,8 @@
 from pydantic import BaseModel, EmailStr, Field
-from typing import Optional
+from typing import Optional, List
 import uuid
 from datetime import datetime
+from src.characters.schemas import CharacterBase
 
 
 class UserModel(BaseModel):
@@ -15,6 +16,12 @@ class UserModel(BaseModel):
     email: EmailStr
     password_hash: str = Field(..., max_length=255)
     created_at: datetime = Field(default_factory=datetime.utcnow)
+    role: str = Field(
+        default="user", description="Role of the user, e.g., 'admin', 'user'"
+    )
+    balance: Optional[float] = Field(
+        default=0.0, description="Balance of the user account"
+    )
 
     class Config:
         orm_mode = True
@@ -26,8 +33,18 @@ class UserCreateModel(BaseModel):
     username: str = Field(max_length=8)
     email: str = Field(max_length=40)
     password: str = Field(min_length=6)
+    role: str = Field(
+        default="user", description="Role of the user, e.g., 'admin', 'user'"
+    )
+    balance: Optional[float] = Field(
+        default=0.0, description="Balance of the user account"
+    )
 
 
 class UserLoginModel(BaseModel):
     email: str = Field(max_length=40)
     password: str = Field(min_length=6)
+
+
+class UserCharactersModel(UserModel):
+    characters: List[CharacterBase]

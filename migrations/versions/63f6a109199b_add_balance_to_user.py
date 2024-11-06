@@ -1,10 +1,11 @@
-"""many-to-many
+"""add_balance_to_user
 
-Revision ID: 72a7e7e87103
-Revises: 6fb5be3485f7
-Create Date: 2024-11-06 00:01:25.801655
+Revision ID: 63f6a109199b
+Revises: 22890229649c
+Create Date: 2024-11-06 21:53:04.871314
 
 """
+
 from typing import Sequence, Union
 
 from alembic import op
@@ -12,8 +13,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '72a7e7e87103'
-down_revision: Union[str, None] = '6fb5be3485f7'
+revision: str = "63f6a109199b"
+down_revision: Union[str, None] = "22890229649c"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

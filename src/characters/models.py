@@ -1,6 +1,4 @@
-import uuid
-from datetime import datetime
-from sqlalchemy import Column, Integer, String, Text, Float, TIMESTAMP, func, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, Float, TIMESTAMP, func
 from sqlalchemy.orm import relationship
 from ..auth.models import user_character_association
 from ..common.base_model import Base

@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 
 
@@ -36,3 +36,11 @@ class CharacterInDB(CharacterBase):
 
     class Config:
         orm_mode = True
+
+class CharacterOutDB(BaseModel):
+    id: int
+    class Config:
+        orm_mode = True
+
+class CharacterList(BaseModel):
+    characters: List[CharacterOutDB]

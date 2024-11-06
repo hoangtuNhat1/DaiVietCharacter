@@ -4,60 +4,78 @@ from sqlalchemy.orm import Session
 from . import crud, schemas
 from src.core.database import get_db
 from src.auth.dependencies import AccessTokenBearer
+from .crud import CharacterService
+from ..auth.dependencies import RoleChecker
+from ..auth.dependencies import get_current_user
 
+admin_role_checker = RoleChecker(["admin"])
+user_role_checker = RoleChecker(["user"])
+admin_or_user_role_checker = RoleChecker(["admin", "user"])
+character_service = CharacterService()
 router = APIRouter()
-acccess_token_bearer = AccessTokenBearer()
+access_token_bearer = AccessTokenBearer()
 
 
 @router.post(
     "/characters/",
     status_code=status.HTTP_201_CREATED,
     response_model=schemas.CharacterInDB,
+    dependencies=[Depends(admin_role_checker)]
 )
 async def create_character(
     character: schemas.CharacterCreate,
     db: Session = Depends(get_db),
-    token_details=Depends(acccess_token_bearer),
+    token_details=Depends(access_token_bearer),
 ):
-    print(token_details)
-    db_character = crud.create_character(
-        db=db,
+    db_character = character_service.create_character(
         character=character,
+        db=db
     )
-
     return db_character
 
 
-@router.get("/characters/{character_id}", response_model=schemas.CharacterInDB)
+@router.get(
+    "/characters/{character_id}", 
+    response_model=schemas.CharacterInDB,
+    dependencies=[Depends(admin_or_user_role_checker)]
+)
 def read_character(
     character_id: int,
     db: Session = Depends(get_db),
-    token_details=Depends(acccess_token_bearer),
+    token_details=Depends(access_token_bearer),
 ):
-    db_character = crud.get_character(db, character_id=character_id)
+    db_character = character_service.get_character(db, character_id=character_id)
     if db_character is None:
         raise HTTPException(status_code=404, detail="Character not found")
     return db_character
 
 
-@router.get("/characters/", response_model=list[schemas.CharacterInDB])
+@router.get(
+    "/characters/", 
+    response_model=list[schemas.CharacterInDB],
+    dependencies=[Depends(admin_or_user_role_checker)]
+)
 def read_characters(
     skip: int = 0,
     limit: int = 10,
     db: Session = Depends(get_db),
-    token_details=Depends(acccess_token_bearer),
+    token_details=Depends(access_token_bearer),
 ):
-    return crud.get_characters(db=db, skip=skip, limit=limit)
+    return character_service.get_characters(db=db, skip=skip, limit=limit)
 
 
-@router.put("/characters/{character_id}", response_model=schemas.CharacterInDB)
+@router.put(
+    "/characters/{character_id}", 
+    response_model=schemas.CharacterInDB,
+    dependencies=[Depends(admin_role_checker)]
+)
 def update_character(
     character_id: int,
     character: schemas.CharacterUpdate,
     db: Session = Depends(get_db),
-    token_details=Depends(acccess_token_bearer),
+    token_details=Depends(access_token_bearer),
 ):
-    db_character = crud.update_character(
+    db_character = character_service.update_character(
         db, character_id=character_id, character=character
     )
     if db_character is None:
@@ -65,13 +83,31 @@ def update_character(
     return db_character
 
 
-@router.delete("/characters/{character_id}", response_model=schemas.CharacterInDB)
+@router.delete(
+    "/characters/{character_id}", 
+    response_model=schemas.CharacterInDB,
+    dependencies=[Depends(admin_role_checker)]
+)
 def delete_character(
     character_id: int,
     db: Session = Depends(get_db),
-    token_details=Depends(acccess_token_bearer),
+    token_details=Depends(access_token_bearer),
 ):
-    db_character = crud.delete_character(db, character_id=character_id)
+    db_character = character_service.delete_character(character_id=character_id, db=db)
     if db_character is None:
         raise HTTPException(status_code=404, detail="Character not found")
     return db_character
+
+
+@router.get(
+    "/user/{user_uid}/characters", 
+    response_model=schemas.CharacterList,
+    dependencies=[Depends(user_role_checker)]
+)
+def get_user_characters(
+    user_uid: str, db: Session = Depends(get_db), skip: int = 0, limit: int = 10
+):
+    characters = character_service.get_user_characters(db, user_uid, skip, limit)
+    if not characters:
+        characters = []
+    return {"characters": characters}
