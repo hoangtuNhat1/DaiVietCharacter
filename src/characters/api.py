@@ -17,27 +17,24 @@ access_token_bearer = AccessTokenBearer()
 
 
 @router.post(
-    "/characters/",
+    "/",
     status_code=status.HTTP_201_CREATED,
     response_model=schemas.CharacterInDB,
-    dependencies=[Depends(admin_role_checker)]
+    dependencies=[Depends(admin_role_checker)],
 )
 async def create_character(
     character: schemas.CharacterCreate,
     db: Session = Depends(get_db),
     token_details=Depends(access_token_bearer),
 ):
-    db_character = character_service.create_character(
-        character=character,
-        db=db
-    )
+    db_character = character_service.create_character(character=character, db=db)
     return db_character
 
 
 @router.get(
-    "/characters/{character_id}", 
+    "/{character_id}",
     response_model=schemas.CharacterInDB,
-    dependencies=[Depends(admin_or_user_role_checker)]
+    dependencies=[Depends(admin_or_user_role_checker)],
 )
 def read_character(
     character_id: int,
@@ -51,9 +48,9 @@ def read_character(
 
 
 @router.get(
-    "/characters/", 
+    "/",
     response_model=list[schemas.CharacterInDB],
-    dependencies=[Depends(admin_or_user_role_checker)]
+    dependencies=[Depends(admin_or_user_role_checker)],
 )
 def read_characters(
     skip: int = 0,
@@ -65,9 +62,9 @@ def read_characters(
 
 
 @router.put(
-    "/characters/{character_id}", 
+    "/{character_id}",
     response_model=schemas.CharacterInDB,
-    dependencies=[Depends(admin_role_checker)]
+    dependencies=[Depends(admin_role_checker)],
 )
 def update_character(
     character_id: int,
@@ -84,9 +81,9 @@ def update_character(
 
 
 @router.delete(
-    "/characters/{character_id}", 
+    "/{character_id}",
     response_model=schemas.CharacterInDB,
-    dependencies=[Depends(admin_role_checker)]
+    dependencies=[Depends(admin_role_checker)],
 )
 def delete_character(
     character_id: int,
@@ -100,9 +97,9 @@ def delete_character(
 
 
 @router.get(
-    "/user/{user_uid}/characters", 
+    "/user/{user_uid}/characters",
     response_model=schemas.CharacterList,
-    dependencies=[Depends(user_role_checker)]
+    dependencies=[Depends(user_role_checker)],
 )
 def get_user_characters(
     user_uid: str, db: Session = Depends(get_db), skip: int = 0, limit: int = 10

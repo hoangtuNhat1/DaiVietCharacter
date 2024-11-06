@@ -8,7 +8,7 @@ from src.core.database import get_db
 from sqlalchemy.orm import Session
 from .service import UserService
 from typing import List, Any
-from src.auth.models import User
+from src.db.models import User
 
 user_service = UserService()
 

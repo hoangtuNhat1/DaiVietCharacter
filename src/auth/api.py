@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
-from .schemas import UserCreateModel, UserModel, UserLoginModel, UserCharactersModel
+from .schemas import UserBase, UserCreate, UserLogin, UserCharacter
 from .service import UserService
 from src.core.database import get_db
 from fastapi.exceptions import HTTPException
@@ -21,11 +21,9 @@ role_checker = RoleChecker(["admin", "user"])
 
 
 @auth_router.post(
-    "/signup", response_model=UserModel, status_code=status.HTTP_201_CREATED
+    "/signup", response_model=UserBase, status_code=status.HTTP_201_CREATED
 )
-async def create_user_account(
-    user_data: UserCreateModel, db: Session = Depends(get_db)
-):
+async def create_user_account(user_data: UserCreate, db: Session = Depends(get_db)):
     email = user_data.email
 
     user_exists = user_service.user_exists(email, db)
@@ -41,7 +39,7 @@ async def create_user_account(
 
 
 @auth_router.post("/login")
-async def login_users(login_data: UserLoginModel, db: Session = Depends(get_db)):
+async def login_users(login_data: UserLogin, db: Session = Depends(get_db)):
     email = login_data.email
     password = login_data.password
 
@@ -120,3 +118,8 @@ async def buy_character(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=error)
 
     return response
+
+
+@auth_router.get("/me", response_model=UserCharacter)
+async def get_current_user(user=Depends(get_current_user)):
+    return user

@@ -1,9 +1,9 @@
-from .models import User
-from .schemas import UserCreateModel
+from .schemas import UserCreate
 from .utils import generate_password_hash
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-from src.characters.models import Character
+from src.db.models import Character
+from src.db.models import User
 
 
 class UserService:
@@ -14,7 +14,7 @@ class UserService:
         user = self.get_user_by_email(email, db)
         return True if user is not None else False
 
-    def create_user(self, user_data: UserCreateModel, db: Session):
+    def create_user(self, user_data: UserCreate, db: Session):
         user_data_dict = user_data.model_dump()
 
         user_data_dict["password_hash"] = generate_password_hash(

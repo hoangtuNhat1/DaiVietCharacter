@@ -2,10 +2,10 @@ from pydantic import BaseModel, EmailStr, Field
 from typing import Optional, List
 import uuid
 from datetime import datetime
-from src.characters.schemas import CharacterBase
+from src.characters.schemas import CharacterOutDB
 
 
-class UserModel(BaseModel):
+class UserBase(BaseModel):
     uid: uuid.UUID = Field(
         default_factory=uuid.uuid4, description="Unique identifier for the user account"
     )
@@ -27,7 +27,7 @@ class UserModel(BaseModel):
         orm_mode = True
 
 
-class UserCreateModel(BaseModel):
+class UserCreate(BaseModel):
     first_name: str = Field(max_length=25)
     last_name: str = Field(max_length=25)
     username: str = Field(max_length=8)
@@ -41,10 +41,10 @@ class UserCreateModel(BaseModel):
     )
 
 
-class UserLoginModel(BaseModel):
+class UserLogin(BaseModel):
     email: str = Field(max_length=40)
     password: str = Field(min_length=6)
 
 
-class UserCharactersModel(UserModel):
-    characters: List[CharacterBase]
+class UserCharacter(UserBase):
+    characters: List[CharacterOutDB]

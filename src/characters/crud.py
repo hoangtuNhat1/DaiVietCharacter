@@ -1,7 +1,7 @@
 import os
 from sqlalchemy.orm import Session
-from ..auth.models import User
-from .models import Character
+from src.db.models import User
+from src.db.models import Character
 from .schemas import CharacterCreate, CharacterUpdate
 from src.core.firebase import upload_file_to_firebase
 

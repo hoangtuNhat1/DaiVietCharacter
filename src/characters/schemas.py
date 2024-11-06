@@ -37,10 +37,13 @@ class CharacterInDB(CharacterBase):
     class Config:
         orm_mode = True
 
+
 class CharacterOutDB(BaseModel):
     id: int
+
     class Config:
         orm_mode = True
+
 
 class CharacterList(BaseModel):
     characters: List[CharacterOutDB]
