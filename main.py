@@ -26,4 +26,4 @@ app.include_router(
     character_router, prefix=f"/api/{API_VERSION}/characters", tags=["characters"]
 )
 app.include_router(auth_router, prefix=f"/api/{API_VERSION}/auth", tags=["auth"])
-app.include_router(log_router, prefix=f"/api/{API_VERSION}/logs", tags=["reviews"])
+app.include_router(log_router, prefix=f"/api/{API_VERSION}/logs", tags=["logs"])
