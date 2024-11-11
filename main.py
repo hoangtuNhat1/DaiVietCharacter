@@ -4,6 +4,7 @@ from src.core.database import init_db
 from src.characters.api import router as character_router
 from src.auth.api import auth_router
 from src.history_logs.api import log_router
+from src.middleware import register_middleware
 
 # Define API version
 API_VERSION = "v1"
@@ -15,13 +16,10 @@ def lifespan(app: FastAPI):
     print("server is stopping")
 
 
-# Initialize FastAPI application with lifespan
 app = FastAPI(lifespan=lifespan)
-
-# Initialize Firebase on app startup
+register_middleware(app)
 init_firebase()
 
-# Include routers with versioned prefixes and tags
 app.include_router(
     character_router, prefix=f"/api/{API_VERSION}/characters", tags=["characters"]
 )

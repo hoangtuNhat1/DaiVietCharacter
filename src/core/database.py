@@ -1,6 +1,5 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-import os
 from src.db.models import Base as auth_base
 from src.db.models import Base as char_base
 from src.config import Config
