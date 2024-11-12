@@ -48,3 +48,35 @@ class UserLogin(BaseModel):
 
 class UserCharacter(UserBase):
     characters: List[CharacterOutDB]
+
+
+class UserUpdate(BaseModel):
+    first_name: Optional[str] = Field(None, max_length=255)
+    last_name: Optional[str] = Field(None, max_length=255)
+    username: Optional[str] = Field(None, max_length=255)
+    email: Optional[EmailStr] = Field(None, max_length=255)
+    password: Optional[str] = Field(None, min_length=6)
+    role: Optional[str] = Field(
+        None, description="Role of the user, e.g., 'admin', 'user'"
+    )
+    balance: Optional[float] = Field(None, description="Balance of the user account")
+    is_verified: Optional[bool] = None
+
+    class Config:
+        orm_mode = True
+
+class UserResponse(BaseModel):
+    uid: uuid.UUID
+    username: str
+    email: EmailStr
+    first_name: Optional[str]
+    last_name: Optional[str]
+    is_verified: bool
+    role: str
+    balance: float
+
+    class Config:
+        orm_mode = True
+
+class EmailModel(BaseModel):
+    addresses: List[str]
