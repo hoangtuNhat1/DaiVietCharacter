@@ -1,20 +1,22 @@
 from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
-from .schemas import UserBase, UserCreate, UserLogin, UserCharacter, UserResponse
+from .schemas import UserCreate, UserLogin, UserCharacter, UserResponse
 from .service import UserService
-from src.core.database import get_db
+from src.db.database import get_db
 from fastapi.exceptions import HTTPException
 from sqlalchemy.orm import Session
-from .utils import *
+
+# from .utils import *
+from .utils import verify_password, create_access_token
+from datetime import datetime, timedelta
 from .dependencies import (
     RefreshTokenBearer,
     AccessTokenBearer,
     get_current_user,
     RoleChecker,
 )
-from src.db.redis import add_jti_to_blocklist
-from src.mail import mail, create_message
-from src.auth.schemas import EmailModel
+from src.utils.redis import add_jti_to_blocklist
+from src.errors import UserAlreadyExists, InvalidCredentials, InvalidToken
 
 REFRESH_TOKEN_EXPIRY = 7
 auth_router = APIRouter()
@@ -25,59 +27,19 @@ role_checker = RoleChecker(["admin", "user"])
 @auth_router.post(
     "/signup", response_model=UserResponse, status_code=status.HTTP_201_CREATED
 )
-async def create_user_account(user_data: UserCreate, db: Session = Depends(get_db)):
+async def create_user_account(
+    user_data: UserCreate, session: Session = Depends(get_db)
+):
     email = user_data.email
 
-    user_exists = user_service.user_exists(email, db)
+    user_exists = user_service.user_exists(email, session)
 
     if user_exists:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="User with email already exists",
-        )
-    new_user = user_service.create_user(user_data, db)
-    token = create_url_safe_token({"email": email})
-    link = f"http://{Config.DOMAIN}/api/v1/auth/verify/{token}"
-    html_message = f"""
-    <h1>Verify your Email</h1>
-    <p>Please click this <a href="{link}">link</a> to verify your email</p>
-    """
+        raise UserAlreadyExists()
 
-    message = create_message(
-        recipients=[email], subject="Verify your email", body=html_message
-    )
+    new_user = user_service.create_user(user_data, session)
 
-    await mail.send_message(message)
-
-    return new_user 
-
-@auth_router.get("/verify/{token}")
-async def verify_user_account(token: str, session: Session = Depends(get_db)):
-
-    token_data = decode_url_safe_token(token)
-
-    user_email = token_data.get("email")
-
-    if user_email:
-        user = user_service.get_user_by_email(user_email, session)
-
-        if not user:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="User not found",
-            )
-
-        user_service.update_user(user, {"is_verified": True}, session)
-
-        return JSONResponse(
-            content={"message": "Account verified successfully"},
-            status_code=status.HTTP_200_OK,
-        )
-
-    return JSONResponse(
-        content={"message": "Error occured during verification"},
-        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-    )
+    return new_user
 
 
 @auth_router.post("/login")
@@ -110,9 +72,7 @@ async def login_users(login_data: UserLogin, db: Session = Depends(get_db)):
                 }
             )
 
-    raise HTTPException(
-        status_code=status.HTTP_403_FORBIDDEN, detail="Invalid Email Or Password"
-    )
+    raise InvalidCredentials()
 
 
 @auth_router.get("/refresh_token")
@@ -124,9 +84,7 @@ async def get_new_access_token(token_details: dict = Depends(RefreshTokenBearer(
 
         return JSONResponse(content={"access_token": new_access_token})
 
-    raise HTTPException(
-        status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Or expired token"
-    )
+    raise InvalidToken()
 
 
 @auth_router.get("/logout")
@@ -165,16 +123,3 @@ async def buy_character(
 @auth_router.get("/me", response_model=UserCharacter)
 async def get_current_user(user=Depends(get_current_user)):
     return user
-
-
-@auth_router.post("/send_mail")
-async def send_mail(emails: EmailModel):
-    emails = emails.addresses
-
-    html = "<h1>Welcome to the app</h1>"
-    subject = "Welcome to our app"
-
-    message = create_message(recipients=emails, subject=subject, body=html)
-    await mail.send_message(message)
-
-    return {"message": "Email sent successfully"}

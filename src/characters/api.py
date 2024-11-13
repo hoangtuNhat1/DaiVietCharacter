@@ -2,7 +2,7 @@ import os
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status
 from sqlalchemy.orm import Session
 from . import crud, schemas
-from src.core.database import get_db
+from src.db.database import get_db
 from src.auth.dependencies import AccessTokenBearer
 from .crud import CharacterService
 from ..auth.dependencies import RoleChecker

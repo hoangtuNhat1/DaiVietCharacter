@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from src.db.models import User
 from src.db.models import Character
 from .schemas import CharacterCreate, CharacterUpdate
-from src.core.firebase import upload_file_to_firebase
+from src.utils.firebase import upload_file_to_firebase
 
 
 class CharacterService:
