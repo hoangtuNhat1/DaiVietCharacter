@@ -1,10 +1,10 @@
 import os
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status
 from sqlalchemy.orm import Session
-from . import crud, schemas
+from . import schemas, service
 from src.db.database import get_db
 from src.auth.dependencies import AccessTokenBearer
-from .crud import CharacterService
+from .service import CharacterService
 from ..auth.dependencies import RoleChecker
 from ..auth.dependencies import get_current_user
 

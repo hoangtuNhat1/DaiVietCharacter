@@ -11,8 +11,8 @@ class CharacterService:
     def get_character(self, character_id: int, db: Session):
         return db.query(Character).filter(Character.id == character_id).first()
 
-    def get_characters(self, db: Session, skip: int = 0, limit: int = 10):
-        return db.query(Character).offset(skip).limit(limit).all()
+    def get_all_characters(self, db: Session):
+        return db.query(Character)
 
     def create_character(self, character: CharacterCreate, db: Session):
         db_character = Character(

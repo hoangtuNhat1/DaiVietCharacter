@@ -11,46 +11,67 @@ class AuthException(Exception):
 
 class InvalidToken(AuthException):
     """User has provided an invalid or expired token"""
+
     pass
+
 
 class RevokedToken(AuthException):
     """User has provided a token that has been revoked"""
+
     pass
+
 
 class AccessTokenRequired(AuthException):
     """User has provided a refresh token when an access token is needed"""
+
     pass
+
 
 class RefreshTokenRequired(AuthException):
     """User has provided an access token when a refresh token is needed"""
+
     pass
+
 
 class UserAlreadyExists(AuthException):
     """User has provided an email for a user who exists during sign up."""
+
     pass
+
+
+class UserNotFound(AuthException):
+    """User has provided an email for a user who exists during sign up."""
+
+    pass
+
 
 class InvalidCredentials(AuthException):
     """User has provided wrong email or password during log in."""
+
     pass
+
 
 class InsufficientPermission(AuthException):
     """User does not have the necessary permissions to perform an action."""
+
     pass
+
 
 class BookNotFound(AuthException):
     """Book Not found"""
+
     pass
+
 
 class TagNotFound(AuthException):
     """Tag Not found"""
+
     pass
+
 
 class TagAlreadyExists(AuthException):
     """Tag already exists"""
-    pass
 
-class UserNotFound(AuthException):
-    """User Not found"""
     pass
 
 

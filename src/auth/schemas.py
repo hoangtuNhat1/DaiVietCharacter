@@ -7,8 +7,8 @@ from src.characters.schemas import CharacterOutDB
 
 class UserBase(BaseModel):
     """
-    UserBase cung cấp các thuộc tính cơ bản của tài khoản người dùng,
-    bao gồm thông tin nhận dạng và các chi tiết tài khoản.
+    Base model providing the essential attributes for a user account,
+    including identification and account details.
     """
 
     uid: uuid.UUID = Field(
@@ -41,7 +41,8 @@ class UserBase(BaseModel):
 
 class UserCreate(BaseModel):
     """
-    UserCreate là lược đồ dùng để tạo tài khoản người dùng mới.
+    Model for creating a new user account, with essential attributes such as
+    first name, last name, username, email, and password.
     """
 
     first_name: str = Field(..., max_length=25, description="First name of the user")
@@ -51,17 +52,11 @@ class UserCreate(BaseModel):
     password: str = Field(
         ..., min_length=6, description="Password for the user account"
     )
-    # role: str = Field(
-    #     default="user", description="Role of the user, e.g., 'admin', 'user'"
-    # )
-    # balance: Optional[float] = Field(
-    #     default=0.0, description="Balance of the user account"
-    # )
 
 
 class UserLogin(BaseModel):
     """
-    UserLogin chứa thông tin đăng nhập của người dùng.
+    Model containing the login information for the user, such as email and password.
     """
 
     email: EmailStr = Field(..., max_length=40, description="User's email address")
@@ -72,7 +67,7 @@ class UserLogin(BaseModel):
 
 class UserCharacter(UserBase):
     """
-    UserCharacter kế thừa từ UserBase và bổ sung danh sách các nhân vật liên quan đến người dùng.
+    Model that extends UserBase and includes a list of characters associated with the user.
     """
 
     characters: List[CharacterOutDB] = Field(
@@ -82,7 +77,7 @@ class UserCharacter(UserBase):
 
 class UserUpdate(BaseModel):
     """
-    UserUpdate là lược đồ để cập nhật thông tin người dùng.
+    Model for updating user information, allowing modifications to name, username, and email.
     """
 
     first_name: Optional[str] = Field(
@@ -97,10 +92,30 @@ class UserUpdate(BaseModel):
     email: Optional[EmailStr] = Field(
         None, max_length=255, description="User's email address"
     )
-    password: Optional[str] = Field(
-        None, min_length=6, description="Password for the user account"
-    )
-    # balance: Optional[float] = Field(None, description="Balance of the user account")
+
+    class Config:
+        orm_mode = True
+
+
+class UserRoleUpdate(BaseModel):
+    """
+    Model for updating the role of a user.
+    """
+
+    email: EmailStr = Field(..., description="User's email address")
+    role: str = Field(..., description="Role of the user, e.g., 'admin', 'user'")
+
+    class Config:
+        orm_mode = True
+
+
+class UserBalanceIncrease(BaseModel):
+    """
+    Model for increasing a user's account balance.
+    """
+
+    email: EmailStr = Field(..., description="User's email address")
+    amount: float = Field(..., description="Amount to increase the user's balance")
 
     class Config:
         orm_mode = True
@@ -108,7 +123,7 @@ class UserUpdate(BaseModel):
 
 class UserResponse(BaseModel):
     """
-    UserResponse chứa các thông tin trả về về người dùng khi thực hiện các thao tác truy vấn.
+    Response model that includes the user's details after performing query actions.
     """
 
     uid: uuid.UUID = Field(..., description="Unique identifier for the user account")
