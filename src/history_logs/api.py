@@ -2,7 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from .schemas import *
 from .service import *
-from src.core.database import get_db
+from .ai_service import chat_character
+from src.db.database import get_db
 from src.auth.dependencies import RoleChecker
 
 log_service = HistoryLogsService()
@@ -92,3 +93,37 @@ def get_character_with_logs(character_id: int, db: Session = Depends(get_db)):
     if character is None:
         raise HTTPException(status_code=404, detail="Character not found")
     return character
+
+
+@log_router.post(
+    "/chat",
+    response_model=HistoryLogResponse,
+    dependencies=[user_role_checker],
+)
+async def chat_with_character(chat_input: ChatInput, db: Session = Depends(get_db)):
+    user_uid = chat_input.user_uid
+    character_id = chat_input.character_id
+    question = chat_input.question
+
+    # Call chat_character to get the prompt and answer, or an error message
+    (response, error) = chat_character(user_uid, character_id, question, db)
+
+    # Handle any errors by raising HTTP exceptions with appropriate status codes
+    if error:
+        if "not found" in error:
+            raise HTTPException(status_code=404, detail=error)
+        elif "do not own" in error:
+            raise HTTPException(status_code=403, detail=error)
+        else:
+            raise HTTPException(status_code=500, detail=error)
+
+    # Create history log entry and return response
+    prompt, answer = response
+    return log_service.create_history_log(
+        db=db,
+        user_id=user_uid,
+        character_id=character_id,
+        question=question,
+        prompt=prompt,
+        answer=answer,
+    )

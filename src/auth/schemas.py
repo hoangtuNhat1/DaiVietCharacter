@@ -6,16 +6,28 @@ from src.characters.schemas import CharacterOutDB
 
 
 class UserBase(BaseModel):
+    """
+    Base model providing the essential attributes for a user account,
+    including identification and account details.
+    """
+
     uid: uuid.UUID = Field(
         default_factory=uuid.uuid4, description="Unique identifier for the user account"
     )
-    username: str = Field(..., max_length=255)
-    first_name: Optional[str] = Field(None, max_length=255)
-    last_name: Optional[str] = Field(None, max_length=255)
-    is_verified: bool = Field(default=False)
-    email: EmailStr
-    password_hash: str = Field(..., max_length=255)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    username: str = Field(..., max_length=255, description="Username of the user")
+    first_name: Optional[str] = Field(
+        None, max_length=255, description="First name of the user"
+    )
+    last_name: Optional[str] = Field(
+        None, max_length=255, description="Last name of the user"
+    )
+    email: EmailStr = Field(..., description="User's email address")
+    password_hash: str = Field(
+        ..., max_length=255, description="Hashed password of the user"
+    )
+    created_at: datetime = Field(
+        default_factory=datetime.utcnow, description="Timestamp of account creation"
+    )
     role: str = Field(
         default="user", description="Role of the user, e.g., 'admin', 'user'"
     )
@@ -28,55 +40,99 @@ class UserBase(BaseModel):
 
 
 class UserCreate(BaseModel):
-    first_name: str = Field(max_length=25)
-    last_name: str = Field(max_length=25)
-    username: str = Field(max_length=8)
-    email: str = Field(max_length=40)
-    password: str = Field(min_length=6)
-    role: str = Field(
-        default="user", description="Role of the user, e.g., 'admin', 'user'"
-    )
-    balance: Optional[float] = Field(
-        default=0.0, description="Balance of the user account"
+    """
+    Model for creating a new user account, with essential attributes such as
+    first name, last name, username, email, and password.
+    """
+
+    first_name: str = Field(..., max_length=25, description="First name of the user")
+    last_name: str = Field(..., max_length=25, description="Last name of the user")
+    username: str = Field(..., max_length=8, description="Username of the user")
+    email: EmailStr = Field(..., max_length=40, description="User's email address")
+    password: str = Field(
+        ..., min_length=6, description="Password for the user account"
     )
 
 
 class UserLogin(BaseModel):
-    email: str = Field(max_length=40)
-    password: str = Field(min_length=6)
+    """
+    Model containing the login information for the user, such as email and password.
+    """
+
+    email: EmailStr = Field(..., max_length=40, description="User's email address")
+    password: str = Field(
+        ..., min_length=6, description="Password for the user account"
+    )
 
 
 class UserCharacter(UserBase):
-    characters: List[CharacterOutDB]
+    """
+    Model that extends UserBase and includes a list of characters associated with the user.
+    """
+
+    characters: List[CharacterOutDB] = Field(
+        ..., description="List of characters associated with the user"
+    )
 
 
 class UserUpdate(BaseModel):
-    first_name: Optional[str] = Field(None, max_length=255)
-    last_name: Optional[str] = Field(None, max_length=255)
-    username: Optional[str] = Field(None, max_length=255)
-    email: Optional[EmailStr] = Field(None, max_length=255)
-    password: Optional[str] = Field(None, min_length=6)
-    role: Optional[str] = Field(
-        None, description="Role of the user, e.g., 'admin', 'user'"
+    """
+    Model for updating user information, allowing modifications to name, username, and email.
+    """
+
+    first_name: Optional[str] = Field(
+        None, max_length=255, description="First name of the user"
     )
-    balance: Optional[float] = Field(None, description="Balance of the user account")
-    is_verified: Optional[bool] = None
+    last_name: Optional[str] = Field(
+        None, max_length=255, description="Last name of the user"
+    )
+    username: Optional[str] = Field(
+        None, max_length=255, description="Username of the user"
+    )
+    email: Optional[EmailStr] = Field(
+        None, max_length=255, description="User's email address"
+    )
 
     class Config:
         orm_mode = True
+
+
+class UserRoleUpdate(BaseModel):
+    """
+    Model for updating the role of a user.
+    """
+
+    email: EmailStr = Field(..., description="User's email address")
+    role: str = Field(..., description="Role of the user, e.g., 'admin', 'user'")
+
+    class Config:
+        orm_mode = True
+
+
+class UserBalanceIncrease(BaseModel):
+    """
+    Model for increasing a user's account balance.
+    """
+
+    email: EmailStr = Field(..., description="User's email address")
+    amount: float = Field(..., description="Amount to increase the user's balance")
+
+    class Config:
+        orm_mode = True
+
 
 class UserResponse(BaseModel):
-    uid: uuid.UUID
-    username: str
-    email: EmailStr
-    first_name: Optional[str]
-    last_name: Optional[str]
-    is_verified: bool
-    role: str
-    balance: float
+    """
+    Response model that includes the user's details after performing query actions.
+    """
+
+    uid: uuid.UUID = Field(..., description="Unique identifier for the user account")
+    username: str = Field(..., description="Username of the user")
+    email: EmailStr = Field(..., description="User's email address")
+    first_name: Optional[str] = Field(None, description="First name of the user")
+    last_name: Optional[str] = Field(None, description="Last name of the user")
+    role: str = Field(..., description="Role of the user, e.g., 'admin', 'user'")
+    balance: float = Field(..., description="Balance of the user account")
 
     class Config:
         orm_mode = True
-
-class EmailModel(BaseModel):
-    addresses: List[str]

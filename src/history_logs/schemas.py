@@ -43,3 +43,13 @@ class CharacterResponse(CharacterOutDB):
 
     class Config:
         orm_mode = True
+
+
+class ChatInput(BaseModel):
+
+    user_uid: str
+    character_id: int
+    question: str
+
+    class Config:
+        orm_mode = True  # Tells Pydantic to treat the SQLAlchemy model as a dictionary
