@@ -14,16 +14,19 @@ class CharacterBase(BaseModel):
     percentage_discount: Optional[float] = None
 
 
-class CharacterCreate(CharacterBase):
-    pass
+class CharacterCreate(BaseModel):
+    short_name: str = Field(..., max_length=255)
+    name: str = Field(..., max_length=255)
+    description: Optional[str] = None
+    original_price: Optional[float] = 0
+    new_price: Optional[float] = 0
+    percentage_discount: Optional[float] = 0
 
 
 class CharacterUpdate(BaseModel):
     short_name: Optional[str] = Field(None, max_length=255)
     name: Optional[str] = Field(None, max_length=255)
     description: Optional[str] = None
-    background_image: Optional[str] = None
-    profile_image: Optional[str] = None
     original_price: Optional[float] = None
     new_price: Optional[float] = None
     percentage_discount: Optional[float] = None
@@ -38,12 +41,11 @@ class CharacterInDB(CharacterBase):
         orm_mode = True
 
 
-class CharacterOutDB(BaseModel):
-    id: int
+class CharacterResponse(CharacterBase):
 
     class Config:
         orm_mode = True
 
 
-class CharacterList(BaseModel):
-    characters: List[CharacterOutDB]
+# class CharacterList(BaseModel):
+#     characters: List[CharacterOutDB]

@@ -57,8 +57,8 @@ class InsufficientPermission(AuthException):
     pass
 
 
-class BookNotFound(AuthException):
-    """Book Not found"""
+class CharacterNotFound(AuthException):
+    """Character Not found"""
 
     pass
 
@@ -71,6 +71,12 @@ class TagNotFound(AuthException):
 
 class TagAlreadyExists(AuthException):
     """Tag already exists"""
+
+    pass
+
+
+class InvalidFileType(AuthException):
+    """Invalid file type"""
 
     pass
 
@@ -109,12 +115,22 @@ def register_error_handlers(app: FastAPI):
         ),
     )
     app.add_exception_handler(
-        BookNotFound,
+        CharacterNotFound,
         create_exception_handler(
             status_code=status.HTTP_404_NOT_FOUND,
             initial_detail={
-                "message": "Book not found",
-                "error_code": "book_not_found",
+                "message": "Character not found",
+                "error_code": "character_not_found",
+            },
+        ),
+    )
+    app.add_exception_handler(
+        InvalidFileType,
+        create_exception_handler(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            initial_detail={
+                "message": "Invalid file type",
+                "error_code": "invalid_file_type",
             },
         ),
     )
@@ -201,16 +217,8 @@ def register_error_handlers(app: FastAPI):
         ),
     )
 
-    app.add_exception_handler(
-        BookNotFound,
-        create_exception_handler(
-            status_code=status.HTTP_404_NOT_FOUND,
-            initial_detail={
-                "message": "Book Not Found",
-                "error_code": "book_not_found",
-            },
-        ),
-    )
+
+    
 
     @app.exception_handler(500)
     async def internal_server_error(request, exc):

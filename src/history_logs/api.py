@@ -87,12 +87,12 @@ def delete_log(log_id: int, db: Session = Depends(get_db)):
     return deleted_log
 
 
-@log_router.get("/{character_id}", response_model=CharacterResponse)
-def get_character_with_logs(character_id: int, db: Session = Depends(get_db)):
-    character = log_service.get_character_with_logs(db, character_id)
-    if character is None:
-        raise HTTPException(status_code=404, detail="Character not found")
-    return character
+# @log_router.get("/{character_id}", response_model=CharacterResponse)
+# def get_character_with_logs(character_id: int, db: Session = Depends(get_db)):
+#     character = log_service.get_character_with_logs(db, character_id)
+#     if character is None:
+#         raise HTTPException(status_code=404, detail="Character not found")
+#     return character
 
 
 @log_router.post(
