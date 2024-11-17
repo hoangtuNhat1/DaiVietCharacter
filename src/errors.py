@@ -80,6 +80,15 @@ class InvalidFileType(AuthException):
 
     pass
 
+class InsufficientBalance(AuthException):
+    """Insufficient balance"""
+
+    pass
+
+class UserAlreadyOwnsCharacter(AuthException):
+    """Insufficient balance"""
+
+    pass
 
 def create_exception_handler(
     status_code: int, initial_detail: dict
@@ -217,8 +226,26 @@ def register_error_handlers(app: FastAPI):
         ),
     )
 
-
-    
+    app.add_exception_handler(
+        InsufficientBalance,
+        create_exception_handler(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            initial_detail={
+                "message": "You do not have enough money to buy this",
+                "error_code": "insufficient_balance",
+            },
+        ),
+    )
+    app.add_exception_handler(
+        UserAlreadyOwnsCharacter,
+        create_exception_handler(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            initial_detail={
+                "message": "You already own the character",
+                "error_code": "user_already_owns_character",
+            },
+        ),
+    )
 
     @app.exception_handler(500)
     async def internal_server_error(request, exc):

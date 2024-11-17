@@ -2,7 +2,6 @@ import uuid
 from sqlalchemy import (
     Column,
     String,
-    Boolean,
     TIMESTAMP,
     func,
     Float,

@@ -6,6 +6,7 @@ from src.db.models import Character, User
 from src.errors import UserNotFound
 from typing import Optional
 
+
 class UserService:
     def get_user_by_email(self, email: str, db: Session) -> User:
         """
@@ -145,42 +146,3 @@ class UserService:
         except IntegrityError:
             db.rollback()
             return None
-
-    def buy_character(
-        self, user_uid: str, character_id: int, db: Session
-    ) -> tuple[Optional[dict], Optional[str]]:
-        """
-        Allows a user to purchase a character if they have enough balance.
-
-        Args:
-            user_uid (str): The unique identifier of the user.
-            character_id (int): The ID of the character to purchase.
-            db (Session): The database session.
-
-        Returns:
-            tuple[Optional[dict], Optional[str]]: A tuple containing a success message or error message.
-        """
-        user = db.query(User).filter(User.uid == user_uid).first()
-        character = db.query(Character).filter(Character.id == character_id).first()
-
-        if not user:
-            return None, "User not found"
-
-        if not character:
-            return None, "Character not found"
-
-        if user.balance < character.new_price:
-            return None, "Insufficient balance"
-
-        user.balance -= character.new_price
-        user.characters.append(character)
-
-        try:
-            db.commit()
-            db.refresh(user)
-            return {
-                "msg": f"Character '{character.name}' purchased successfully."
-            }, None
-        except IntegrityError:
-            db.rollback()
-            return None, "Error while processing the purchase."
