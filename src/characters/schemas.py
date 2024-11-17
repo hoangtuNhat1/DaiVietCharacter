@@ -4,6 +4,7 @@ from datetime import datetime
 
 
 class CharacterBase(BaseModel):
+    id: int
     short_name: str = Field(..., max_length=255)
     name: str = Field(..., max_length=255)
     description: Optional[str] = None
@@ -47,5 +48,10 @@ class CharacterResponse(CharacterBase):
         orm_mode = True
 
 
-# class CharacterList(BaseModel):
-#     characters: List[CharacterOutDB]
+class CharacterUser(CharacterBase):
+    own: bool
+
+    class Config:
+        orm_mode = True
+class CharacterListResponse(BaseModel):
+    characters: List[CharacterUser]

@@ -2,6 +2,7 @@ from pydantic import BaseModel, EmailStr, Field
 from typing import Optional, List
 import uuid
 from datetime import datetime
+
 # from src.characters.schemas import CharacterOutDB
 
 

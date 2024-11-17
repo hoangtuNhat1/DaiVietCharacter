@@ -3,7 +3,8 @@ from src.utils.firebase import init_firebase
 from src.db.database import init_db
 from src.characters.controller import char_router
 from src.auth.controller import auth_router
-from src.history_logs.api import log_router
+
+# from src.history_logs.api import log_router
 from src.middleware import register_middleware
 from src.errors import register_error_handlers
 
@@ -26,4 +27,4 @@ app.include_router(
     char_router, prefix=f"/api/{API_VERSION}/characters", tags=["characters"]
 )
 app.include_router(auth_router, prefix=f"/api/{API_VERSION}/auth", tags=["auth"])
-app.include_router(log_router, prefix=f"/api/{API_VERSION}/logs", tags=["logs"])
+# app.include_router(log_router, prefix=f"/api/{API_VERSION}/logs", tags=["logs"])

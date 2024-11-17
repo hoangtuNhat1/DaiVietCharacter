@@ -22,6 +22,7 @@ from .dependencies import (
 from src.utils.redis import add_jti_to_blocklist
 from src.errors import UserAlreadyExists, InvalidCredentials, InvalidToken
 from .utils import verify_password, create_access_token
+
 REFRESH_TOKEN_EXPIRY = 7
 auth_router = APIRouter()
 user_service = UserService()
