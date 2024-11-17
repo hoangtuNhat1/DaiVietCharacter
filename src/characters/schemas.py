@@ -53,5 +53,7 @@ class CharacterUser(CharacterBase):
 
     class Config:
         orm_mode = True
+
+
 class CharacterListResponse(BaseModel):
     characters: List[CharacterUser]

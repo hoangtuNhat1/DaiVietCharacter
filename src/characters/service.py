@@ -3,11 +3,17 @@ from sqlalchemy.orm import Session
 from src.db.models import Character, user_character_association
 from .schemas import CharacterCreate, CharacterUpdate
 from src.utils.firebase import upload_file_to_firebase
-from src.errors import CharacterNotFound, InvalidFileType, InsufficientBalance, UserAlreadyOwnsCharacter
+from src.errors import (
+    CharacterNotFound,
+    InvalidFileType,
+    InsufficientBalance,
+    UserAlreadyOwnsCharacter,
+)
 from fastapi import UploadFile
 from src.auth.schemas import UserResponse
 from sqlalchemy.exc import IntegrityError
 from tempfile import NamedTemporaryFile
+
 
 class CharacterService:
 
@@ -100,16 +106,13 @@ class CharacterService:
         """
         Fetch characters and determine ownership for the specified user.
         """
-    # Query all characters and join with the user-character association table
+        # Query all characters and join with the user-character association table
         results = (
-            db.query(
-                Character,
-                user_character_association.c.user_uid.label("user_uid")
-            )
+            db.query(Character, user_character_association.c.user_uid.label("user_uid"))
             .outerjoin(
                 user_character_association,
-                (user_character_association.c.character_id == Character.id) &
-                (user_character_association.c.user_uid == user.uid)
+                (user_character_association.c.character_id == Character.id)
+                & (user_character_association.c.user_uid == user.uid),
             )
             .all()
         )
@@ -132,9 +135,8 @@ class CharacterService:
                 }
             )
         return characters
-    def buy_character(
-        self, user: UserResponse, character_id: int, db: Session
-    ) :
+
+    def buy_character(self, user: UserResponse, character_id: int, db: Session):
         """
         Allows a user to purchase a character if they have enough balance.
 
@@ -161,9 +163,7 @@ class CharacterService:
         try:
             db.commit()
             db.refresh(user)
-            return {
-                "msg": f"Character '{character.name}' purchased successfully."
-            }
+            return {"msg": f"Character '{character.name}' purchased successfully."}
         except IntegrityError:
             db.rollback()
             return {"msg": "An error occurred while processing the transaction."}
