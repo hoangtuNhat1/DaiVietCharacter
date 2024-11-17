@@ -63,14 +63,8 @@ class CharacterNotFound(AuthException):
     pass
 
 
-class TagNotFound(AuthException):
-    """Tag Not found"""
-
-    pass
-
-
-class TagAlreadyExists(AuthException):
-    """Tag already exists"""
+class LogNotFound(AuthException):
+    """Character Not found"""
 
     pass
 
@@ -80,15 +74,24 @@ class InvalidFileType(AuthException):
 
     pass
 
+
 class InsufficientBalance(AuthException):
     """Insufficient balance"""
 
     pass
 
+
 class UserAlreadyOwnsCharacter(AuthException):
     """Insufficient balance"""
 
     pass
+
+
+class UserNotOwnsCharacter(AuthException):
+    """Insufficient balance"""
+
+    pass
+
 
 def create_exception_handler(
     status_code: int, initial_detail: dict
@@ -130,6 +133,16 @@ def register_error_handlers(app: FastAPI):
             initial_detail={
                 "message": "Character not found",
                 "error_code": "character_not_found",
+            },
+        ),
+    )
+    app.add_exception_handler(
+        LogNotFound,
+        create_exception_handler(
+            status_code=status.HTTP_404_NOT_FOUND,
+            initial_detail={
+                "message": "Log not found",
+                "error_code": "log_not_found",
             },
         ),
     )
@@ -207,24 +220,6 @@ def register_error_handlers(app: FastAPI):
             },
         ),
     )
-    app.add_exception_handler(
-        TagNotFound,
-        create_exception_handler(
-            status_code=status.HTTP_404_NOT_FOUND,
-            initial_detail={"message": "Tag Not Found", "error_code": "tag_not_found"},
-        ),
-    )
-
-    app.add_exception_handler(
-        TagAlreadyExists,
-        create_exception_handler(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            initial_detail={
-                "message": "Tag Already exists",
-                "error_code": "tag_exists",
-            },
-        ),
-    )
 
     app.add_exception_handler(
         InsufficientBalance,
@@ -243,6 +238,17 @@ def register_error_handlers(app: FastAPI):
             initial_detail={
                 "message": "You already own the character",
                 "error_code": "user_already_owns_character",
+            },
+        ),
+    )
+
+    app.add_exception_handler(
+        UserNotOwnsCharacter,
+        create_exception_handler(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            initial_detail={
+                "message": "You do not own the character. Please purchase it first.",
+                "error_code": "user_not_owns_character",
             },
         ),
     )

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status
+from fastapi import APIRouter, Depends, UploadFile, File, status
 from sqlalchemy.orm import Session
 from src.db.database import get_db
 from .service import CharacterService
@@ -12,6 +12,7 @@ from .schemas import (
 from src.auth.schemas import UserResponse
 from typing import Dict
 from src.errors import CharacterNotFound, InsufficientBalance, UserAlreadyOwnsCharacter
+
 admin_role_checker = RoleChecker(["admin"])
 user_role_checker = RoleChecker(["user"])
 admin_or_user_role_checker = RoleChecker(["admin", "user"])
@@ -76,11 +77,12 @@ def get_user_characters(
     characters = character_service.get_user_characters(user, db)
     return {"characters": characters}
 
+
 @char_router.post("/buy-character/{character_id}", response_model=Dict[str, str])
 def buy_character(
     character_id: int,
     db: Session = Depends(get_db),
-    user: UserResponse = Depends(get_current_user)
+    user: UserResponse = Depends(get_current_user),
 ):
     """
     Endpoint for a user to buy a character.
@@ -96,10 +98,9 @@ def buy_character(
     try:
         result = character_service.buy_character(user, character_id, db)
         return result
-    except CharacterNotFound as e :
+    except CharacterNotFound as e:
         raise e
-    except UserAlreadyOwnsCharacter as e :
+    except UserAlreadyOwnsCharacter as e:
         raise e
-    except InsufficientBalance as e :
+    except InsufficientBalance as e:
         raise e
-    
