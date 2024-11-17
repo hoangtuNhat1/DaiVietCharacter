@@ -4,8 +4,9 @@ from src.db.models import User
 from src.db.models import Character
 from .schemas import CharacterCreate, CharacterUpdate
 from src.utils.firebase import upload_file_to_firebase
-
-
+from src.errors import CharacterNotFound, UserNotFound, InvalidFileType
+from fastapi import UploadFile
+from tempfile import NamedTemporaryFile
 class CharacterService:
 
     def get_character(self, character_id: int, db: Session):
@@ -15,7 +16,7 @@ class CharacterService:
         return db.query(Character)
 
     def create_character(self, character: CharacterCreate, db: Session):
-        db_character = Character(
+        character = Character(
             short_name=character.short_name,
             name=character.name,
             description=character.description,
@@ -23,60 +24,80 @@ class CharacterService:
             new_price=character.new_price,
             percentage_discount=character.percentage_discount,
         )
-
-        # Upload images if provided
-        if os.path.isfile(character.profile_image):
-            profile_image_url = upload_file_to_firebase(
-                character.profile_image,
-                f"profiles/{os.path.basename(character.profile_image)}",
-            )
-            db_character.profile_image = profile_image_url
-
-        if os.path.isfile(character.background_image):
-            background_image_url = upload_file_to_firebase(
-                character.background_image,
-                f"backgrounds/{os.path.basename(character.background_image)}",
-            )
-            db_character.background_image = background_image_url
-
-        db.add(db_character)
+        db.add(character)
         db.commit()
-        db.refresh(db_character)
-        return db_character
+        db.refresh(character)
+        return character
+    def update_images(self, character_id: int, pf_img: UploadFile, bg_img: UploadFile, db: Session) -> str:
+        character = db.query(Character).filter(Character.id == character_id).first()
+        if not character:
+            raise CharacterNotFound()
+        if not pf_img.content_type.startswith("image/"):
+            raise InvalidFileType
+        if not bg_img.content_type.startswith("image/"):
+            raise InvalidFileType
+        temp_files = []
+        profile_image_url = None
+        background_image_url = None
+        try:
+            with NamedTemporaryFile(delete=False, suffix=f".{pf_img.filename.split('.')[-1]}") as tmp_pf_img:
+                tmp_pf_img.write(pf_img.file.read())
+                temp_files.append(tmp_pf_img.name)
+                pf_img_path = tmp_pf_img.name
+                if os.path.isfile(pf_img_path):
+                    profile_image_url = upload_file_to_firebase(
+                        pf_img_path,
+                        f"profiles/{os.path.basename(pf_img_path)}",
+                    )
+                character.profile_image = profile_image_url
+            with NamedTemporaryFile(delete=False, suffix=f".{bg_img.filename.split('.')[-1]}") as tmp_bg_img:
+                tmp_bg_img.write(bg_img.file.read())
+                temp_files.append(tmp_bg_img.name)
+                bg_img_path = tmp_bg_img.name
+                if os.path.isfile(bg_img_path):
+                    background_image_url = upload_file_to_firebase(
+                        bg_img_path,
+                        f"profiles/{os.path.basename(bg_img_path)}",
+                    )
+                character.background_image = background_image_url
+            db.commit()
+        finally:
+            for file_path in temp_files:
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+        return character
 
     def update_character(
-        self, character_id: int, character: CharacterUpdate, db: Session
+        self, character_id: int, character_update: CharacterUpdate, db: Session
     ):
-        db_character = self.get_character(character_id, db)
-        if not db_character:
-            return None
-        for key, value in character.dict(exclude_unset=True).items():
-            setattr(db_character, key, value)
+        character = self.get_character(character_id, db)
+        character_data_dict = character_update.model_dump(exclude_unset=True)
+        if not character:
+            return CharacterNotFound()
+        for key, value in character_data_dict.items():
+            setattr(character, key, value)
         db.commit()
-        db.refresh(db_character)
-        return db_character
+        db.refresh(character)
+        return character
 
     def delete_character(self, character_id: int, db: Session):
-        db_character = self.get_character(character_id, db)
-        if db_character:
-            db.delete(db_character)
+        character = self.get_character(character_id, db)
+        if character:
+            db.delete(character)
             db.commit()
-        return db_character
+        return character
 
     def get_user_characters(
-        self, db: Session, user_uid: str, skip: int = 0, limit: int = 10
+        self, db: Session, user_uid: str,
     ):
         user = db.query(User).filter(User.uid == user_uid).first()
 
         if not user:
-            return None  # Or raise HTTPException if user not found
+            raise UserNotFound()
 
-        # Query the Character table directly and filter by user ID with offset and limit
         return (
             db.query(Character.id)
             .join(User.characters)
             .filter(User.uid == user_uid)
-            .offset(skip)
-            .limit(limit)
             .all()
         )

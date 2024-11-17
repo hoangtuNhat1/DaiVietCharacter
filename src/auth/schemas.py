@@ -2,7 +2,7 @@ from pydantic import BaseModel, EmailStr, Field
 from typing import Optional, List
 import uuid
 from datetime import datetime
-from src.characters.schemas import CharacterOutDB
+# from src.characters.schemas import CharacterOutDB
 
 
 class UserBase(BaseModel):
@@ -65,14 +65,14 @@ class UserLogin(BaseModel):
     )
 
 
-class UserCharacter(UserBase):
-    """
-    Model that extends UserBase and includes a list of characters associated with the user.
-    """
+# class UserCharacter(UserBase):
+#     """
+#     Model that extends UserBase and includes a list of characters associated with the user.
+#     """
 
-    characters: List[CharacterOutDB] = Field(
-        ..., description="List of characters associated with the user"
-    )
+#     characters: List[CharacterOutDB] = Field(
+#         ..., description="List of characters associated with the user"
+#     )
 
 
 class UserUpdate(BaseModel):

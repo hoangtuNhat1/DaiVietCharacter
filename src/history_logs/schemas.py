@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime
 from enum import Enum
-from src.characters.schemas import CharacterOutDB
+# from src.characters.schemas import CharacterOutDB
 
 
 class Feedback(str, Enum):
@@ -38,11 +38,11 @@ class HistoryLogResponse(BaseModel):
         orm_mode = True  # Tells Pydantic to treat the SQLAlchemy model as a dictionary
 
 
-class CharacterResponse(CharacterOutDB):
-    history_logs: List[HistoryLogResponse]  # List of history logs for this character
+# class CharacterResponse(CharacterOutDB):
+#     history_logs: List[HistoryLogResponse]  # List of history logs for this character
 
-    class Config:
-        orm_mode = True
+#     class Config:
+#         orm_mode = True
 
 
 class ChatInput(BaseModel):
